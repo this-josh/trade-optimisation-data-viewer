@@ -13,6 +13,7 @@ def run():
     models = [f.name for f in results_path.glob('*/') if f.is_dir()]
     models =['Disrupted', 'Undisrupted']
     option = st.selectbox("Select model", models)
+    option = option.lower()
 
     st.write(f"Loading {option}")
 
