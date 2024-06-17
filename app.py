@@ -3,7 +3,6 @@ import streamlit.components.v1 as components
 from collections import namedtuple
 import numpy as np
 import dill as pickle
-from streamlit_profiler import Profiler
 
 st.set_page_config(layout="wide")
 
@@ -104,5 +103,4 @@ def run():
 
     st.plotly_chart(result.gamma_fig, use_container_width=True)
 
-with Profiler():
-    run()
+run()
