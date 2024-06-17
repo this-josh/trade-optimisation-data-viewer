@@ -45,14 +45,10 @@ def run():
     col2.metric("Total trade", f"{np.sum(result.Q):.2e}m³")
     col3.metric("AQ", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
     col4.metric("Solve time", f"{result.solve_time:.2f}s")
-    map_path =results_path/f'separate_disrupted_linear_/html/{period}.html'
-    with open(map_path,  'r', encoding='utf-8') as f:
-        html_data = f.read()
+    period_s3 =str(period).split(' ')[0]
+    map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/separate_disrupted_linear_/html/{period_s3}+00%3A00%3A00.html'
 
-    components.html(html_data, scrolling=True, height=500)
-    # components.iframe('https://joshkirk.co.uk/', scrolling=True, height=500)
-
-    # st.components.v1.iframe(map_path, scrolling=True, height=500)
+    st.components.v1.iframe(map_path, scrolling=False, height=1000)
     st.plotly_chart(result.supply_fig, use_container_width=True)
 
     st.plotly_chart(result.S_fig, use_container_width=True)
