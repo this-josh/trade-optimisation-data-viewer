@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "trade-optimisation-data-viewer"
+version = "0.1.0"
+description = ""
+authors = ["Josh Kirk <59419126+this-josh@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+streamlit = "^1.35.0"
+dill = "^0.3.8"
+numpy = "^1"
+watchdog = "^4.0.1"
+plotly = "^5.22.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
