@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 from collections import namedtuple
 import numpy as np
 import dill as pickle
+from streamlit_profiler import Profiler
 
 st.set_page_config(layout="wide")
 
@@ -45,6 +46,18 @@ def load_map(map_path):
     """.format(map_path=map_path)  # Replace with your actual map_path
     return custom_html
 
+@st.cache_resource
+def load_static(option):
+    with open(results_path/option/'static.pkl', 'rb') as f:
+        r = pickle.load(f)
+
+    Result = namedtuple('Result', r.keys())
+    result = Result(**r)
+    return result
+
+@st.cache_resource
+def load_A():
+    return np.load("A.npy")
 
 
 def run():
@@ -56,14 +69,8 @@ def run():
     st.write(f"Loading {option}")
 
 
-    with open(results_path/option/'static.pkl', 'rb') as f:
-        r = pickle.load(f)
-
-    Result = namedtuple('Result', r.keys())
-    result = Result(**r)
-
-
-    A = np.load("A.npy")
+    result= load_static(option)
+    A = load_A()
     periods = result.periods
 
     with st.form("Optional"):
@@ -97,4 +104,5 @@ def run():
 
     st.plotly_chart(result.gamma_fig, use_container_width=True)
 
-run()
+with Profiler():
+    run()
