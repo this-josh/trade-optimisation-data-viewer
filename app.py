@@ -11,7 +11,7 @@ results_path = Path('./results/')
 
 def run():
     models = [f.name for f in results_path.glob('*/') if f.is_dir()]
-    models =['separate_disrupted_linear_']
+    models =['Disrupted', 'Undisrupted']
     option = st.selectbox("Select model", models)
 
     st.write(f"Loading {option}")
@@ -46,7 +46,7 @@ def run():
     col3.metric("AQ", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
     col4.metric("Solve time", f"{result.solve_time:.2f}s")
     period_s3 =str(period).split(' ')[0]
-    map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/separate_disrupted_linear_/html/{period_s3}+00%3A00%3A00.html'
+    map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/{option.lower()}/html/{period_s3}+00%3A00%3A00.html'
 
     st.components.v1.iframe(map_path, scrolling=False, height=1000)
     st.plotly_chart(result.supply_fig, use_container_width=True)
