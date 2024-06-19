@@ -117,7 +117,7 @@ def run():
     col3.metric(r"$m^3 \times$ meters travelled", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
     # col4.metric("Solve time", f"{result.solve_time:.2f}s")
     period_s3 =str(periods[period_idx]).split(' ')[0]
-    map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/{option.lower()}/html/{period_s3}+00%3A00%3A00.html'
+    map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/{option.lower()}/{period_s3}+00%3A00%3A00.html'
     print(map_path)
 
     custom_html = load_map(map_path)
