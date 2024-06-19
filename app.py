@@ -93,7 +93,7 @@ This work in progress app aids viewing the highly dimensional trade optimisation
 
 def run():
     st.title("Trade Optimisation Data Viewer")
-    st.logo("https://github.com/this-josh/2024_Iame_presentation/blob/440febe3b88f8b1478b61fe6a54b6ba7d1c68d0c/assets/TSL_logo.png?raw=true")
+    st.logo("https://github.com/tsl-imperial/assets/blob/main/tsl-logo-dark.png?raw=true")
     cols = st.columns(spec=[0.2,0.8])
     cols[0].write("Select whether you'd like to include the disruption")
     option = cols[0].toggle("Disrupted", value=True)
