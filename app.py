@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 from collections import namedtuple
 import numpy as np
 import dill as pickle
+from datetime import datetime
 
 st.set_page_config(layout="wide")
 
@@ -60,47 +61,71 @@ def load_A():
 
 
 def run():
-    models = [f.name for f in results_path.glob('*/') if f.is_dir()]
-    models =['Disrupted', 'Undisrupted']
-    option = st.selectbox("Select model", models)
-    option = option.lower()
+    st.title("Trade Optimisation Data Viewer")
+    st.markdown("This work in progress app aids viewing the highly dimensional trade optimisation results")
 
-    st.write(f"Loading {option}")
+    cols = st.columns(spec=[0.2,0.8])
+    cols[0].write("Select whether you'd like to include the disruption")
+    option = cols[0].toggle("Disrupted", value=True)
+    option = 'disrupted' if option else 'undisrupted'
+
 
 
     result= load_static(option)
-    A = load_A()
     periods = result.periods
 
-    with st.form("Optional"):
-        period = st.select_slider("Period",periods, value=periods[10])
-        _ = st.form_submit_button("Submit")
+    period_str =  [date.strftime("%b %Y") for date in periods]
+    cols[1].write("Select the month you'd like to view, this only affects the node and line colouts")
+    period = cols[1].select_slider("Period",period_str, value=period_str[10])
+    period_idx = period_str.index(period)
+    A = load_A()
 
-    st.title(period)
+    info_cols = st.columns([0.2,0.3,0.5])
+    info_cols[0].markdown(f"""
+                ## How this figure works
 
-    st.markdown(f"""
-    Links closer to 100% utilisations are more transparent.
-    Blue shows more trade going from west to east
-    Orange shows trade going from east to west
-    Circle colours are defined by the summed link utilisation 
+                - You can select a node to get a detailed view
+                - Links close to full utilisation are more transparent
+                - Blue shows more trade going from west to east
+                - Orange shows trade going from east to west
+                - Circle colours are defined by the summed link utilisation
+
     """)
 
+    info_cols[1].markdown("""
+                              ## Node plot key
+| Name     | Description                    |
+|----------|--------------------------------|
+| C        | Consumption                    |
+| ExCap    | Export Capacity                |
+| ImCap    | Import Capacity                |
+| P        | Domestic Production            |
+| S        | Stockpile                      |
+| TotEx    | Total Monthly Exports          |
+| TotIm    | Total Monthly Imports          |
+| taun     | Amount withdraw from stockpile |
+| taup     | Amount deposited to stockpile  |
+| $\gamma$ | Supply deficit                 |
+                """                
+                )
 
-    col1, col2,col3,col4 = st.columns(4)
+    col1, col2,col3 = info_cols[2].columns(3)
     col1.metric("Total deficit", f"{np.sum(result.gamma):.0f}m³")
-    col2.metric("Total trade", f"{np.sum(result.Q):.2e}m³")
-    col3.metric("AQ", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
-    col4.metric("Solve time", f"{result.solve_time:.2f}s")
-    period_s3 =str(period).split(' ')[0]
+    col1.metric("Total trade", f"{np.sum(result.Q):.2e}m³")
+    col1.metric(r"$m^3 \times$ meters travelled", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
+    # col4.metric("Solve time", f"{result.solve_time:.2f}s")
+    period_s3 =str(periods[period_idx]).split(' ')[0]
     map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/{option.lower()}/html/{period_s3}+00%3A00%3A00.html'
     print(map_path)
 
     custom_html = load_map(map_path)
     components.html(custom_html, height=1000)
-    st.plotly_chart(result.supply_fig, use_container_width=True)
+    # st.plotly_chart(result.supply_fig, use_container_width=True)
 
     st.plotly_chart(result.S_fig, use_container_width=True)
 
     st.plotly_chart(result.gamma_fig, use_container_width=True)
+
+
 
 run()
