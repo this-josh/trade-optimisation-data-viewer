@@ -59,41 +59,19 @@ def load_static(option):
 def load_A():
     return np.load("A.npy")
 
+def sidebar():
+    st.markdown(f"""
+This work in progress app aids viewing the highly dimensional trade optimisation results
 
-def run():
-    st.title("Trade Optimisation Data Viewer")
-    st.markdown("This work in progress app aids viewing the highly dimensional trade optimisation results")
+## How this figure works
 
-    cols = st.columns(spec=[0.2,0.8])
-    cols[0].write("Select whether you'd like to include the disruption")
-    option = cols[0].toggle("Disrupted", value=True)
-    option = 'disrupted' if option else 'undisrupted'
+- You can select a node to get a detailed view
+- Links close to full utilisation are more transparent
+- :blue[Blue] shows more trade going from west to east
+- :orange[Orange] shows trade going from east to west
+- Circle colours are defined by the summed link utilisation
 
-
-
-    result= load_static(option)
-    periods = result.periods
-
-    period_str =  [date.strftime("%b %Y") for date in periods]
-    cols[1].write("Select the month you'd like to view, this only affects the node and line colouts")
-    period = cols[1].select_slider("Period",period_str, value=period_str[10])
-    period_idx = period_str.index(period)
-    A = load_A()
-
-    info_cols = st.columns([0.2,0.3,0.5])
-    info_cols[0].markdown(f"""
-                ## How this figure works
-
-                - You can select a node to get a detailed view
-                - Links close to full utilisation are more transparent
-                - Blue shows more trade going from west to east
-                - Orange shows trade going from east to west
-                - Circle colours are defined by the summed link utilisation
-
-    """)
-
-    info_cols[1].markdown("""
-                              ## Node plot key
+## Node plot key
 | Name     | Description                    |
 |----------|--------------------------------|
 | C        | Consumption                    |
@@ -109,10 +87,34 @@ def run():
                 """                
                 )
 
-    col1, col2,col3 = info_cols[2].columns(3)
+
+
+
+
+def run():
+    st.title("Trade Optimisation Data Viewer")
+    st.logo("https://github.com/this-josh/2024_Iame_presentation/blob/440febe3b88f8b1478b61fe6a54b6ba7d1c68d0c/assets/TSL_logo.png?raw=true")
+    cols = st.columns(spec=[0.2,0.8])
+    cols[0].write("Select whether you'd like to include the disruption")
+    option = cols[0].toggle("Disrupted", value=True)
+    option = 'disrupted' if option else 'undisrupted'
+
+
+
+    result= load_static(option)
+    periods = result.periods
+
+    period_str =  [date.strftime("%b %Y") for date in periods]
+    cols[1].write("Select the month you'd like to view, this only affects the node and line colours")
+    period = cols[1].select_slider("Period",period_str, value=period_str[10])
+    period_idx = period_str.index(period)
+    A = load_A()
+    with st.sidebar:
+        sidebar()
+    col1, col2,col3 = st.columns(3)
     col1.metric("Total deficit", f"{np.sum(result.gamma):.0f}m³")
-    col1.metric("Total trade", f"{np.sum(result.Q):.2e}m³")
-    col1.metric(r"$m^3 \times$ meters travelled", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
+    col2.metric("Total trade", f"{np.sum(result.Q):.2e}m³")
+    col3.metric(r"$m^3 \times$ meters travelled", f"{np.sum(np.abs(A) @ np.abs(result.Q)) :.2e}m³")
     # col4.metric("Solve time", f"{result.solve_time:.2f}s")
     period_s3 =str(periods[period_idx]).split(' ')[0]
     map_path =fr'https://trade-optimisation-data-viewer.s3.eu-west-2.amazonaws.com/results/{option.lower()}/html/{period_s3}+00%3A00%3A00.html'
